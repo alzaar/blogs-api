@@ -7,11 +7,12 @@ from django.contrib.auth.models import User
 from rest_framework.views import APIView
 
 class BlogViewSet(generics.ListCreateAPIView):
+  permission_classes = ()
   def get(self, request, *args, **kwargs):
-    username = request.data.get('username')
-    password = request.data.get('password')
-    user = authenticate(username=username, password=password)
-    user_id = User.objects.get(username=user)
+    # username = request.data.get('username')
+    # password = request.data.get('password')
+    # user = authenticate(username=username, password=password)
+    # user_id = User.objects.get(username=user)
       # blogs = blogs.objects.filter(created_by=user_id)
     # print(user_id, 123, request.user)
 
