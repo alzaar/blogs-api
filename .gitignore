@@ -1,0 +1,6 @@
+/db.sqlite3
+/api/settings.py
+/.vscode
+/Pipfile.lock
+/blogs/migrations/0001_initial.py
+/blogs/migrations/__init__.py
