@@ -1,29 +1,36 @@
 from django.shortcuts import render
-from rest_framework import generics, response, status
+from rest_framework import generics, response, status, permissions
 from .serializers import BlogSerializer, UserSerializer
 from .models import Blog
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from rest_framework.views import APIView
 
-class BlogViewSet(generics.ListCreateAPIView):
+class BlogListCreate(generics.ListCreateAPIView):
   permission_classes = ()
+  queryset = ''
   def get(self, request, *args, **kwargs):
-    # username = request.data.get('username')
-    # password = request.data.get('password')
-    # user = authenticate(username=username, password=password)
-    # user_id = User.objects.get(username=user)
-      # blogs = blogs.objects.filter(created_by=user_id)
-    # print(user_id, 123, request.user)
-
-    # if user:
-    return response.Response(
-      {
-    "msg": "hello"
-}
-    )
-
+    if request.user.is_authenticated:
+      blogs = Blog.objects.filter(created_by=request.user)
+      data = BlogSerializer(blogs, many=True).data
+      return response.Response(data)
+    else:
+      return response.Response({'error': True, 'msg': 'Not signed in.'})
+  
   serializer_class = BlogSerializer
+
+class BlogDetail(generics.RetrieveDestroyAPIView):
+  permission_classes = ()
+  queryset = ''
+  serializer_class = BlogSerializer
+  def get(self, request, blog_id):
+    if request.user.is_authenticated:
+      blog = Blog.objects.get(pk=blog_id)
+      data = BlogSerializer(blog).data
+      return response.Response(data)
+    else:
+      return response.Response({'error': True, 'msg': 'Not signed in.'})
+
 
 class UserCreate(generics.CreateAPIView):
   permission_classes = ()
@@ -33,6 +40,7 @@ class UserCreate(generics.CreateAPIView):
 class LoginView(APIView):
   permission_classes = ()
   def post(self, request,):
+    print(request.data)
     username = request.data.get('username')
     password = request.data.get('password')
     user = authenticate(username=username, password=password)
