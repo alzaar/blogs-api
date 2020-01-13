@@ -10,6 +10,7 @@ class BlogListCreate(generics.ListCreateAPIView):
   permission_classes = ()
   queryset = ''
   def get(self, request, *args, **kwargs):
+    print(self.kwargs, request.user, request.auth)
     if request.user.is_authenticated:
       blogs = Blog.objects.filter(created_by=request.user)
       data = BlogSerializer(blogs, many=True).data
