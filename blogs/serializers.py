@@ -2,7 +2,7 @@ from rest_framework import serializers
 from .models import Blog
 from django.contrib.auth.models import User
 from rest_framework.authtoken.models import Token
-
+from django.contrib.auth import authenticate
 class BlogSerializer(serializers.ModelSerializer):
   class Meta:
     model = Blog
@@ -20,3 +20,13 @@ class UserSerializer(serializers.ModelSerializer):
     user.save()
     Token.objects.create(user=user)
     return user
+
+class LoginSerializer(serializers.Serializer):
+  username = serializers.CharField()
+  password = serializers.CharField()
+
+  def validate(self, data):
+    user = authenticate(**data)
+    if user and user.is_active:
+      return user
+    raise serializers.ValidationError("Incorrect Credentials") 

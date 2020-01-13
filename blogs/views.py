@@ -1,13 +1,17 @@
 from django.shortcuts import render
 from rest_framework import generics, response, status, permissions
-from .serializers import BlogSerializer, UserSerializer
+from .serializers import BlogSerializer, UserSerializer, LoginSerializer
 from .models import Blog
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from rest_framework.views import APIView
-
+from knox.auth import TokenAuthentication
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication
+from rest_framework.permissions import IsAuthenticated
+from knox.models import AuthToken
 class BlogListCreate(generics.ListCreateAPIView):
-  permission_classes = ()
+  permission_classes = (IsAuthenticated,)
+  authentication_classes = (TokenAuthentication,)
   queryset = ''
   def get(self, request, *args, **kwargs):
     print(self.kwargs, request.user, request.auth)
@@ -21,7 +25,7 @@ class BlogListCreate(generics.ListCreateAPIView):
   serializer_class = BlogSerializer
 
 class BlogDetail(generics.RetrieveDestroyAPIView):
-  permission_classes = ()
+  permission_classes = (TokenAuthentication)
   queryset = ''
   serializer_class = BlogSerializer
   def get(self, request, blog_id):
@@ -38,14 +42,27 @@ class UserCreate(generics.CreateAPIView):
   authentication_classes = ()
   serializer_class = UserSerializer
 
-class LoginView(APIView):
+class LoginView(generics.GenericAPIView):
   permission_classes = ()
+  serializer_class = LoginSerializer
   def post(self, request,):
-    print(request.data)
-    username = request.data.get('username')
-    password = request.data.get('password')
-    user = authenticate(username=username, password=password)
+    serializer = self.get_serializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    user = serializer.validated_data
+    print(AuthToken.objects.create(user))
     if user:
-      return response.Response({"token": user.auth_token.key})
+      return response.Response({
+        "user": UserSerializer(user, context=self.get_serializer_context()).data,
+        "token": AuthToken.objects.create(user)[1]
+      })
     else: 
       return response.Response({'error': True}, status=status.HTTP_400_BAD_REQUEST)
+
+class UserAPI(generics.RetrieveAPIView):
+  permission_classes = [
+    permissions.IsAuthenticated,
+  ]
+  serializer_class = UserSerializer
+
+  def get_object(self):
+    return self.request.user 
