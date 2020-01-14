@@ -9,6 +9,8 @@ from knox.auth import TokenAuthentication
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 from rest_framework.permissions import IsAuthenticated
 from knox.models import AuthToken
+
+
 class BlogListCreate(generics.ListCreateAPIView):
   permission_classes = (IsAuthenticated,)
   authentication_classes = (TokenAuthentication,)
@@ -49,7 +51,6 @@ class LoginView(generics.GenericAPIView):
     serializer = self.get_serializer(data=request.data)
     serializer.is_valid(raise_exception=True)
     user = serializer.validated_data
-    print(AuthToken.objects.create(user))
     if user:
       return response.Response({
         "user": UserSerializer(user, context=self.get_serializer_context()).data,
