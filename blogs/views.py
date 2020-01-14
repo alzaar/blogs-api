@@ -9,14 +9,14 @@ from knox.auth import TokenAuthentication
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 from rest_framework.permissions import IsAuthenticated
 from knox.models import AuthToken
-
+from  django.http import HttpResponse
+import json
 
 class BlogListCreate(generics.ListCreateAPIView):
   permission_classes = (IsAuthenticated,)
   authentication_classes = (TokenAuthentication,)
   queryset = ''
   def get(self, request, *args, **kwargs):
-    print(self.kwargs, request.user, request.auth)
     if request.user.is_authenticated:
       blogs = Blog.objects.filter(created_by=request.user)
       data = BlogSerializer(blogs, many=True).data
@@ -52,10 +52,8 @@ class LoginView(generics.GenericAPIView):
     serializer.is_valid(raise_exception=True)
     user = serializer.validated_data
     if user:
-      return response.Response({
-        "user": UserSerializer(user, context=self.get_serializer_context()).data,
-        "token": AuthToken.objects.create(user)[1]
-      })
+      token = f'Token {AuthToken.objects.create(user)[1]}'
+      return response.Response({'token': token}, status=status.HTTP_201_CREATED)
     else: 
       return response.Response({'error': True}, status=status.HTTP_400_BAD_REQUEST)
 
