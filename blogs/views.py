@@ -65,3 +65,5 @@ class UserAPI(generics.RetrieveAPIView):
 
   def get_object(self):
     return self.request.user 
+
+# Add register view for users and view for return token authentication
