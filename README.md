@@ -1,3 +1,3 @@
 # Backend for Blog App - Django
 
-Created to experiment Django Rest Framework
+Created to experiment with  Django Rest Framework
