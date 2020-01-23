@@ -11,6 +11,7 @@ from rest_framework.permissions import IsAuthenticated
 from knox.models import AuthToken
 from  django.http import HttpResponse
 import json
+from rest_framework.authtoken.models import Token
 
 class BlogListCreate(generics.ListCreateAPIView):
   permission_classes = (IsAuthenticated,)
@@ -24,6 +25,10 @@ class BlogListCreate(generics.ListCreateAPIView):
     else:
       return response.Response({'error': True, 'msg': 'Not signed in.'})
   
+  def post(self, request):
+    request.data['created_by'] = request.user.pk
+    super().post(request)
+    return response.Response({'error': False, 'msg': 'Success'})
   serializer_class = BlogSerializer
 
 class BlogDetail(generics.RetrieveDestroyAPIView):
@@ -68,3 +73,7 @@ class UserAPI(generics.RetrieveAPIView):
 
 # Add register view for users and view for return token authentication
 # class RegisterView(generics.A)
+
+# class User(APIView):
+#   def get(self, request):
+#     print(request)
