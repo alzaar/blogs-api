@@ -13,7 +13,25 @@ from  django.http import HttpResponse
 import json
 from rest_framework.authtoken.models import Token
 
-class BlogListCreate(generics.ListCreateAPIView):
+class BlogCreate(generics.CreateAPIView):
+  permission_classes = (IsAuthenticated,)
+  authentication_classes = (TokenAuthentication,)
+  queryset = ''
+  # def get(self, request, *args, **kwargs):
+  #   if request.user.is_authenticated:
+  #     blogs = Blog.objects.filter(created_by=request.user)
+  #     data = BlogSerializer(blogs, many=True).data
+  #     return response.Response(data)
+  #   else:
+  #     return response.Response({'error': True, 'msg': 'Not signed in.'})
+  
+  def post(self, request):
+    request.data['created_by'] = request.user.pk
+    super().post(request)
+    return response.Response({'error': False, 'msg': 'Successfully created blog.'})
+  serializer_class = BlogSerializer
+
+class BlogsList(generics.ListAPIView):
   permission_classes = (IsAuthenticated,)
   authentication_classes = (TokenAuthentication,)
   queryset = ''
@@ -24,12 +42,7 @@ class BlogListCreate(generics.ListCreateAPIView):
       return response.Response(data)
     else:
       return response.Response({'error': True, 'msg': 'Not signed in.'})
-  
-  def post(self, request):
-    request.data['created_by'] = request.user.pk
-    super().post(request)
-    return response.Response({'error': False, 'msg': 'Success'})
-  serializer_class = BlogSerializer
+
 
 class BlogDetail(generics.RetrieveDestroyAPIView):
   permission_classes = (TokenAuthentication)
