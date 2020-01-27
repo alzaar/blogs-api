@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from rest_framework import generics, response, status, permissions
 from .serializers import BlogSerializer, UserSerializer, LoginSerializer
 from .models import Blog
@@ -24,12 +24,12 @@ class BlogCreate(generics.CreateAPIView):
   #     return response.Response(data)
   #   else:
   #     return response.Response({'error': True, 'msg': 'Not signed in.'})
+  serializer_class = BlogSerializer
   
   def post(self, request):
     request.data['created_by'] = request.user.pk
     super().post(request)
     return response.Response({'error': False, 'msg': 'Successfully created blog.'})
-  serializer_class = BlogSerializer
 
 class BlogsList(generics.ListAPIView):
   permission_classes = (IsAuthenticated,)
@@ -43,9 +43,21 @@ class BlogsList(generics.ListAPIView):
     else:
       return response.Response({'error': True, 'msg': 'Not signed in.'})
 
+class BlogDestroy(generics.DestroyAPIView):
+  permission_classes = (IsAuthenticated,)
+  authentication_classes = (TokenAuthentication,)
+  queryset = ''
+  serializer_class = BlogSerializer
 
-class BlogDetail(generics.RetrieveDestroyAPIView):
-  permission_classes = (TokenAuthentication)
+  def delete(self, request):
+    if get_object_or_404(Blog, pk=request.data['id']).delete():
+      return response.Response({'status': True, 'msg': 'Blog deleted'})
+    else:
+      return response.Response({'status': False, 'msg': 'Blog not deleted'})
+
+
+class BlogDetail(APIView):
+  permission_classes = (TokenAuthentication,)
   queryset = ''
   serializer_class = BlogSerializer
   def get(self, request, blog_id):
@@ -90,3 +102,10 @@ class UserAPI(generics.RetrieveAPIView):
 # class User(APIView):
 #   def get(self, request):
 #     print(request)
+
+class AuthUser(APIView):
+  permission_classes = (IsAuthenticated,)
+  authentication_classes = (TokenAuthentication,)
+  def get(self, request):
+    if request.user.is_authenticated:
+      return response.Response({'userSession': True, 'msg': 'Session valid'}, status=status.HTTP_200_OK)

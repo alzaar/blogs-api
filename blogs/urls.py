@@ -1,4 +1,4 @@
-from .views import BlogsList, UserCreate, LoginView, BlogDetail, BlogCreate
+from .views import BlogsList, UserCreate, LoginView, BlogDetail, BlogCreate, AuthUser, BlogDestroy
 from django.urls import path, include
 from knox import views as knox_views
 urlpatterns = [
@@ -9,4 +9,6 @@ urlpatterns = [
   path('login', LoginView.as_view(), name='login_view'),
   path('logout', knox_views.LogoutView.as_view(), name='logout_view'),
   path('auth', include('knox.urls')),
+  path('validsession', AuthUser.as_view(), name='auth_user' ),
+  path('delete', BlogDestroy.as_view(), name='delete_blog')
 ]
