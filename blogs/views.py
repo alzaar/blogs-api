@@ -14,8 +14,8 @@ import json
 from rest_framework.authtoken.models import Token
 
 class BlogCreate(generics.CreateAPIView):
-  permission_classes = (IsAuthenticated,)
-  authentication_classes = (TokenAuthentication,)
+  # permission_classes = (IsAuthenticated,)
+  # authentication_classes = (TokenAuthentication,)
   queryset = ''
   # def get(self, request, *args, **kwargs):
   #   if request.user.is_authenticated:
